@@ -1,0 +1,717 @@
+<h2 class="sr-only">Zepto Strategic Insights Dashboard — interactive Power BI-style analytics built with sample data covering dark store coverage, category performance, delivery trends, and market segmentation across Indian cities.</h2>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --z-purple: #8B5CF6;
+    --z-purple-dark: #6D28D9;
+    --z-purple-light: #EDE9FE;
+    --z-purple-mid: #C4B5FD;
+    --z-accent: #F59E0B;
+    --z-green: #10B981;
+    --z-red: #EF4444;
+    --z-bg: var(--color-background-primary);
+    --z-bg2: var(--color-background-secondary);
+    --z-text: var(--color-text-primary);
+    --z-muted: var(--color-text-secondary);
+    --z-border: var(--color-border-tertiary);
+    --radius: 12px;
+  }
+
+  .dash {
+    font-family: 'DM Sans', sans-serif;
+    padding: 1rem 0;
+    width: 100%;
+  }
+
+  .dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-badge {
+    background: var(--z-purple);
+    color: white;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    letter-spacing: 0.04em;
+  }
+
+  .dash-title {
+    font-size: 14px;
+    color: var(--z-muted);
+    font-weight: 400;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    color: var(--z-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-right: 4px;
+  }
+
+  .filter-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--z-border);
+    background: var(--z-bg2);
+    color: var(--z-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn.active {
+    background: var(--z-purple);
+    color: white;
+    border-color: var(--z-purple);
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+
+  .kpi-card {
+    background: var(--z-bg2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    border: 0.5px solid var(--z-border);
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    color: var(--z-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .kpi-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--z-text);
+    line-height: 1.1;
+  }
+
+  .kpi-delta {
+    font-size: 11px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .kpi-delta.up { color: var(--z-green); }
+  .kpi-delta.down { color: var(--z-red); }
+
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .chart-card {
+    background: var(--z-bg);
+    border: 0.5px solid var(--z-border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .chart-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--z-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 14px;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .bar-city {
+    font-size: 12px;
+    color: var(--z-muted);
+    width: 68px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 14px;
+    background: var(--z-bg2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--z-purple);
+    transition: width 0.6s ease;
+  }
+
+  .bar-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--z-text);
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .segment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .seg-card {
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .seg-card.opp {
+    background: #EDE9FE;
+    border: 1px solid var(--z-purple-mid);
+  }
+
+  .seg-card.sat {
+    background: var(--z-bg2);
+    border: 0.5px solid var(--z-border);
+  }
+
+  .seg-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .seg-card.opp .seg-label { color: var(--z-purple-dark); }
+  .seg-card.sat .seg-label { color: var(--z-muted); }
+
+  .seg-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .seg-card.opp .seg-count { color: var(--z-purple); }
+
+  .seg-cities {
+    font-size: 10px;
+    color: var(--z-muted);
+    line-height: 1.4;
+  }
+
+  .legend-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    font-size: 11px;
+    color: var(--z-muted);
+  }
+
+  .legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 4px;
+  }
+
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .trend-line-wrap {
+    position: relative;
+    height: 90px;
+    margin-top: 6px;
+  }
+
+  .cat-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 7px;
+  }
+
+  .cat-name {
+    font-size: 11px;
+    color: var(--z-muted);
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .cat-track {
+    flex: 1;
+    height: 10px;
+    background: var(--z-bg2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .cat-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+
+  .cat-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--z-text);
+    width: 30px;
+    text-align: right;
+  }
+
+  .rating-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 0.5px solid var(--z-border);
+  }
+
+  .rating-row:last-child { border-bottom: none; }
+
+  .rating-name {
+    font-size: 12px;
+    color: var(--z-text);
+  }
+
+  .rating-stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .star {
+    width: 9px;
+    height: 9px;
+    background: var(--z-accent);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  .star.empty { background: var(--z-border); }
+
+  .rating-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--z-muted);
+    width: 26px;
+    text-align: right;
+  }
+
+  .slot-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+
+  @media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid { grid-template-columns: 1fr; }
+    .bottom-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="dash">
+
+  <div class="dash-header">
+    <div class="logo-row">
+      <span class="logo-badge">ZEPTO</span>
+      <div>
+        <div style="font-size: 15px; font-weight: 500; color: var(--z-text);">Strategic Insights Dashboard</div>
+        <div class="dash-title">Q-Commerce · India · FY 2024–25</div>
+      </div>
+    </div>
+    <div style="font-size: 11px; color: var(--z-muted); font-family: 'Space Mono', monospace;">Last updated: Apr 2025</div>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-label">City</span>
+    <button class="filter-btn active" onclick="setCity('All')">All</button>
+    <button class="filter-btn" onclick="setCity('Mumbai')">Mumbai</button>
+    <button class="filter-btn" onclick="setCity('Bengaluru')">Bengaluru</button>
+    <button class="filter-btn" onclick="setCity('Delhi')">Delhi</button>
+    <button class="filter-btn" onclick="setCity('Hyderabad')">Hyderabad</button>
+    <button class="filter-btn" onclick="setCity('Pune')">Pune</button>
+  </div>
+
+  <div class="kpi-grid" id="kpi-grid">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Dark store coverage by city</div>
+      <div id="city-bars"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Market segmentation (DAX logic)</div>
+      <div class="segment-grid" style="margin-bottom: 10px;">
+        <div class="seg-card opp">
+          <div class="seg-label">Opportunity zones</div>
+          <div class="seg-count" id="opp-count">4</div>
+          <div class="seg-cities" id="opp-cities">Chandigarh, Jaipur, Lucknow, Kochi</div>
+        </div>
+        <div class="seg-card sat">
+          <div class="seg-label">Saturated zones</div>
+          <div class="seg-count" id="sat-count">3</div>
+          <div class="seg-cities" id="sat-cities">Mumbai, Bengaluru, Delhi NCR</div>
+        </div>
+      </div>
+      <div style="font-size: 11px; color: var(--z-muted); line-height: 1.5;">
+        Opportunity = &lt;15 stores/M pop + order growth &gt;35% YoY<br>
+        Saturated = &gt;30 stores/M pop + growth &lt;12% YoY
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 10px;" class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Order growth trend (2021–2025)</div>
+      <div class="legend-row">
+        <span><span class="legend-dot" style="background: var(--z-purple);"></span>Total orders (M)</span>
+        <span><span class="legend-dot" style="background: var(--z-accent);"></span>Avg order value (₹)</span>
+      </div>
+      <div class="trend-line-wrap">
+        <canvas id="trendChart" role="img" aria-label="Line chart of Zepto order growth from 2021 to 2025, showing total orders rising from 12M to 410M and avg order value rising from 285 to 520 rupees.">Orders grew from 12M in 2021 to 410M in 2025. Avg order value rose from ₹285 to ₹520.</canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Delivery slot demand (% of orders)</div>
+      <div style="margin-top: 6px;">
+        <div class="bar-row">
+          <div class="bar-city" style="width: 90px; text-align: right; font-size: 11px;"><span class="slot-dot" style="background: var(--z-purple);"></span>6–10 min</div>
+          <div class="bar-track"><div class="bar-fill" style="width: 62%; background: var(--z-purple);"></div></div>
+          <div class="bar-val">62%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-city" style="width: 90px; text-align: right; font-size: 11px;"><span class="slot-dot" style="background: var(--z-accent);"></span>10–15 min</div>
+          <div class="bar-track"><div class="bar-fill" style="width: 24%; background: var(--z-accent);"></div></div>
+          <div class="bar-val">24%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-city" style="width: 90px; text-align: right; font-size: 11px;"><span class="slot-dot" style="background: #C084FC;"></span>15–20 min</div>
+          <div class="bar-track"><div class="bar-fill" style="width: 10%; background: #C084FC;"></div></div>
+          <div class="bar-val">10%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-city" style="width: 90px; text-align: right; font-size: 11px;"><span class="slot-dot" style="background: var(--z-border);"></span>20+ min</div>
+          <div class="bar-track"><div class="bar-fill" style="width: 4%; background: var(--z-muted);"></div></div>
+          <div class="bar-val">4%</div>
+        </div>
+        <div style="margin-top: 10px; font-size: 11px; color: var(--z-muted); border-top: 0.5px solid var(--z-border); padding-top: 8px;">
+          62% of customers receive delivery within 6–10 min — core Zepto promise zone
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-grid" style="margin-top: 10px;">
+    <div class="chart-card">
+      <div class="chart-title">Category GMV share</div>
+      <div style="margin-top: 4px;">
+        <div class="cat-bar-row">
+          <div class="cat-name">Grocery</div>
+          <div class="cat-track"><div class="cat-fill" style="width: 68%; background: var(--z-purple);"></div></div>
+          <div class="cat-pct">68%</div>
+        </div>
+        <div class="cat-bar-row">
+          <div class="cat-name">Snacks/Bev</div>
+          <div class="cat-track"><div class="cat-fill" style="width: 44%; background: var(--z-accent);"></div></div>
+          <div class="cat-pct">44%</div>
+        </div>
+        <div class="cat-bar-row">
+          <div class="cat-name">Personal care</div>
+          <div class="cat-track"><div class="cat-fill" style="width: 28%; background: #34D399;"></div></div>
+          <div class="cat-pct">28%</div>
+        </div>
+        <div class="cat-bar-row">
+          <div class="cat-name">Electronics</div>
+          <div class="cat-track"><div class="cat-fill" style="width: 18%; background: #60A5FA;"></div></div>
+          <div class="cat-pct">18%</div>
+        </div>
+        <div class="cat-bar-row">
+          <div class="cat-name">Home & Clean</div>
+          <div class="cat-track"><div class="cat-fill" style="width: 12%; background: #F87171;"></div></div>
+          <div class="cat-pct">12%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Top dark stores by rating</div>
+      <div id="ratings-list"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Key performance KPIs</div>
+      <div id="kpi-list"></div>
+    </div>
+  </div>
+
+  <div style="margin-top: 10px; padding: 12px 16px; background: var(--z-bg2); border-radius: var(--radius); border: 0.5px solid var(--z-border);">
+    <div style="font-size: 11px; color: var(--z-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.07em;">Strategic recommendation (DAX-driven insight)</div>
+    <div style="font-size: 13px; color: var(--z-text); line-height: 1.6;" id="reco-text">
+      Tier-2 expansion (Jaipur, Lucknow, Chandigarh) shows &gt;35% YoY order growth with &lt;40% dark store penetration — highest ROI opportunity for H2 2025 capex. Personal care and electronics show fastest attach rate growth; bundle promotions recommended.
+    </div>
+  </div>
+
+  <div style="margin-top: 8px; text-align: right; font-size: 10px; color: var(--z-muted); font-family: 'Space Mono', monospace;">
+    Built with Power BI methodology · DAX segmentation · Sample data for portfolio
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const cityData = {
+  All:       { stores: 320, orders: '410M', aov: '₹520', coverage: '68%', rating: 4.3, growth: '+42%', nps: '74' },
+  Mumbai:    { stores: 72,  orders: '95M',  aov: '₹580', coverage: '82%', rating: 4.4, growth: '+28%', nps: '71' },
+  Bengaluru: { stores: 68,  orders: '88M',  aov: '₹540', coverage: '79%', rating: 4.5, growth: '+31%', nps: '78' },
+  Delhi:     { stores: 64,  orders: '82M',  aov: '₹510', coverage: '75%', rating: 4.2, growth: '+25%', nps: '69' },
+  Hyderabad: { stores: 44,  orders: '52M',  aov: '₹495', coverage: '61%', rating: 4.3, growth: '+38%', nps: '72' },
+  Pune:      { stores: 32,  orders: '38M',  aov: '₹465', coverage: '52%', rating: 4.1, growth: '+44%', nps: '67' },
+};
+
+const cityBars = {
+  All:       [['Mumbai', 72, 100], ['Bengaluru', 68, 94], ['Delhi', 64, 89], ['Hyderabad', 44, 61], ['Pune', 32, 44], ['Chennai', 24, 33]],
+  Mumbai:    [['Andheri', 18, 100], ['Bandra', 14, 78], ['Thane', 12, 67], ['Dadar', 10, 56], ['Navi Mumbai', 9, 50], ['Borivali', 9, 50]],
+  Bengaluru: [['Koramangala', 16, 100], ['Whitefield', 14, 88], ['HSR Layout', 13, 81], ['Indiranagar', 12, 75], ['JP Nagar', 8, 50], ['Hebbal', 5, 31]],
+  Delhi:     [['Connaught Pl', 14, 100], ['Dwarka', 12, 86], ['Noida Sec 62', 11, 79], ['Gurugram', 15, 100], ['Vasant Kunj', 7, 50], ['Rohini', 5, 36]],
+  Hyderabad: [['Hitech City', 14, 100], ['Gachibowli', 12, 86], ['Banjara Hills', 10, 71], ['Madhapur', 8, 57]],
+  Pune:      [['Hinjewadi', 10, 100], ['Kothrud', 8, 80], ['Baner', 7, 70], ['Viman Nagar', 7, 70]],
+};
+
+const segData = {
+  All:       { opp: 4, oppC: 'Chandigarh, Jaipur, Lucknow, Kochi', sat: 3, satC: 'Mumbai, Bengaluru, Delhi NCR' },
+  Mumbai:    { opp: 2, oppC: 'Borivali, Thane', sat: 3, satC: 'Andheri, Bandra, Dadar' },
+  Bengaluru: { opp: 2, oppC: 'Hebbal, Electronic City', sat: 3, satC: 'Koramangala, Whitefield, Indiranagar' },
+  Delhi:     { opp: 2, oppC: 'Rohini, East Delhi', sat: 3, satC: 'Gurugram, Noida, Connaught Pl' },
+  Hyderabad: { opp: 2, oppC: 'Secunderabad, LB Nagar', sat: 2, satC: 'Hitech City, Gachibowli' },
+  Pune:      { opp: 3, oppC: 'Hadapsar, Kharadi, Aundh', sat: 1, satC: 'Hinjewadi' },
+};
+
+const recos = {
+  All: 'Tier-2 expansion (Jaipur, Lucknow, Chandigarh) shows >35% YoY order growth with <40% dark store penetration — highest ROI opportunity for H2 2025 capex. Personal care and electronics show fastest attach rate growth; bundle promotions recommended.',
+  Mumbai: 'Borivali and Thane corridors show <50% coverage despite strong demand signals. Recommend 2 dark store additions by Q3 2025. AOV of ₹580 is highest in portfolio — premium SKU bundling will drive basket expansion.',
+  Bengaluru: 'Hebbal and Electronic City are fastest-growing micro-markets. Tech cluster correlates with high AOV. NPS of 78 is network-best — leverage for referral campaigns. Target 2 new stores in North Bengaluru.',
+  Delhi: 'Gurugram coverage is strong but East Delhi remains underserved. High price sensitivity in NCR; focus on value bundles. Rohini has strong volume potential — recommend pilot dark store by Q2 2025.',
+  Hyderabad: 'Secunderabad and LB Nagar show rising search intent with zero coverage. 38% YoY growth makes Hyderabad a strong capex priority. Recommend 3 new stores to capture pre-saturation phase.',
+  Pune: 'Fastest growth city at 44% YoY. Hadapsar and Kharadi are tech corridors with high disposable income — AOV expansion likely. Only 1 saturated zone; nearly all areas are still opportunity zones.',
+};
+
+let currentCity = 'All';
+
+function setCity(city) {
+  currentCity = city;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.textContent === city));
+  renderKPIs();
+  renderCityBars();
+  renderSegments();
+  document.getElementById('reco-text').textContent = recos[city];
+}
+
+function renderKPIs() {
+  const d = cityData[currentCity];
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-label">Dark Stores</div>
+      <div class="kpi-value">${d.stores}</div>
+      <div class="kpi-delta up">▲ ${d.growth} YoY</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Monthly Orders</div>
+      <div class="kpi-value">${d.orders}</div>
+      <div class="kpi-delta up">▲ Active users</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-value">${d.aov}</div>
+      <div class="kpi-delta up">▲ +11% basket</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Coverage Index</div>
+      <div class="kpi-value">${d.coverage}</div>
+      <div class="kpi-delta ${parseFloat(d.coverage) >= 70 ? 'up' : 'down'}">${parseFloat(d.coverage) >= 70 ? '▲ High density' : '▼ Expand needed'}</div>
+    </div>
+  `;
+}
+
+function renderCityBars() {
+  const bars = cityBars[currentCity];
+  const max = bars[0][1];
+  document.getElementById('city-bars').innerHTML = bars.map(([name, val, pct]) =>
+    `<div class="bar-row">
+      <div class="bar-city">${name}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="bar-val">${val}</div>
+    </div>`
+  ).join('');
+}
+
+function renderSegments() {
+  const s = segData[currentCity];
+  document.getElementById('opp-count').textContent = s.opp;
+  document.getElementById('opp-cities').textContent = s.oppC;
+  document.getElementById('sat-count').textContent = s.sat;
+  document.getElementById('sat-cities').textContent = s.satC;
+}
+
+const ratingsData = [
+  ['Koramangala, BLR', 4.7],
+  ['Bandra, Mumbai', 4.6],
+  ['Whitefield, BLR', 4.5],
+  ['Gurugram Sec 44', 4.4],
+  ['Andheri W, MUM', 4.3],
+  ['Hitech City, HYD', 4.2],
+];
+
+function stars(r) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) s += `<div class="star ${i <= Math.round(r) ? '' : 'empty'}"></div>`;
+  return s;
+}
+
+document.getElementById('ratings-list').innerHTML = ratingsData.map(([name, r]) =>
+  `<div class="rating-row">
+    <div class="rating-name" style="font-size: 11px;">${name}</div>
+    <div class="rating-stars">${stars(r)}</div>
+    <div class="rating-val">${r.toFixed(1)}</div>
+  </div>`
+).join('');
+
+document.getElementById('kpi-list').innerHTML = `
+  <div class="rating-row">
+    <div style="font-size: 11px; color: var(--z-muted);">Avg delivery time</div>
+    <div style="font-family: 'Space Mono', monospace; font-size: 12px; color: var(--z-purple);">8.4 min</div>
+  </div>
+  <div class="rating-row">
+    <div style="font-size: 11px; color: var(--z-muted);">Order success rate</div>
+    <div style="font-family: 'Space Mono', monospace; font-size: 12px; color: var(--z-green);">97.2%</div>
+  </div>
+  <div class="rating-row">
+    <div style="font-size: 11px; color: var(--z-muted);">Cancellation rate</div>
+    <div style="font-family: 'Space Mono', monospace; font-size: 12px; color: var(--z-red);">2.8%</div>
+  </div>
+  <div class="rating-row">
+    <div style="font-size: 11px; color: var(--z-muted);">Repeat order rate</div>
+    <div style="font-family: 'Space Mono', monospace; font-size: 12px; color: var(--z-text);">71%</div>
+  </div>
+  <div class="rating-row">
+    <div style="font-size: 11px; color: var(--z-muted);">NPS score</div>
+    <div style="font-family: 'Space Mono', monospace; font-size: 12px; color: var(--z-accent);">74</div>
+  </div>
+`;
+
+renderKPIs();
+renderCityBars();
+renderSegments();
+
+window.addEventListener('load', () => {
+  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+  const purple = '#8B5CF6';
+  const amber = '#F59E0B';
+  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const textColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)';
+
+  new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: ['2021', '2022', '2023', '2024', '2025'],
+      datasets: [
+        {
+          label: 'Orders (M)',
+          data: [12, 48, 130, 260, 410],
+          borderColor: purple,
+          backgroundColor: 'rgba(139,92,246,0.1)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: purple,
+          borderWidth: 2,
+          yAxisID: 'y',
+        },
+        {
+          label: 'AOV (₹)',
+          data: [285, 320, 390, 455, 520],
+          borderColor: amber,
+          borderDash: [4, 3],
+          backgroundColor: 'transparent',
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: amber,
+          borderWidth: 2,
+          yAxisID: 'y1',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 } } },
+        y: { position: 'left', grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 }, callback: v => v + 'M' } },
+        y1: { position: 'right', grid: { display: false }, ticks: { color: textColor, font: { size: 10 }, callback: v => '₹' + v } }
+      }
+    }
+  });
+});
+
+function setCity(city) {
+  currentCity = city;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.textContent === city));
+  renderKPIs();
+  renderCityBars();
+  renderSegments();
+  document.getElementById('reco-text').textContent = recos[city];
+}
+</script>
